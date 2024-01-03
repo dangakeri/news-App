@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,8 +7,12 @@ import '../inner_screens/blog_details.dart';
 import '../services/utils.dart';
 
 class TopTrendingWidget extends StatelessWidget {
-  const TopTrendingWidget({Key? key}) : super(key: key);
-  // final String url;
+  final String url;
+  const TopTrendingWidget({
+    Key? key,
+    required this.url,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final size = Utils(context).getScreenSize;

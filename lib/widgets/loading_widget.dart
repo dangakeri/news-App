@@ -3,8 +3,11 @@ import 'package:news/services/utils.dart';
 import 'package:news/widgets/vertical_spacing.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../consts/var.dart';
+
 class LoadingWidget extends StatefulWidget {
-  const LoadingWidget({super.key});
+  final NewsType newsType;
+  const LoadingWidget({super.key, required this.newsType});
 
   @override
   State<LoadingWidget> createState() => _LoadingWidgetState();

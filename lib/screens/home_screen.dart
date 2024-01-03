@@ -1,14 +1,20 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:news/apiservices/api_services.dart';
 import 'package:news/consts/var.dart';
 import 'package:news/inner_screens/search_screen.dart';
+import 'package:news/models/news_model.dart';
+import 'package:news/providers/news_provider.dart';
 import 'package:news/services/utils.dart';
 import 'package:news/widgets/drawer_widget.dart';
+import 'package:news/widgets/empty_screen.dart';
+import 'package:news/widgets/loading_widget.dart';
 import 'package:news/widgets/tabs_widget.dart';
 import 'package:news/widgets/toptrending_widget.dart';
 import 'package:news/widgets/vertical_spacing.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/articles_widget.dart';
 
@@ -23,15 +29,23 @@ class _HomeScreenState extends State<HomeScreen> {
   var newsType = NewsType.allNews;
   int currentPageIndex = 0;
   String sortBy = SortByEnum.publishedAt.name;
+
   @override
   void didChangeDependencies() {
+    getNewsList();
     super.didChangeDependencies();
+  }
+
+  Future<List<NewsModel>> getNewsList() async {
+    List<NewsModel> newsList = await ApiService.getNews();
+    return newsList;
   }
 
   @override
   Widget build(BuildContext context) {
     final Color color = Utils(context).getColor;
     Size size = Utils(context).getScreenSize;
+    final newsProvider = Provider.of<NewsProvider>(context);
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -186,30 +200,57 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-              if (newsType == NewsType.allNews)
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: 20,
-                    itemBuilder: (context, index) {
-                      return const ArticlesWidget();
-                    },
-                  ),
-                ),
-              if (newsType == NewsType.topTrending)
-                SizedBox(
-                  height: size.height * 0.6,
-                  child: Swiper(
-                    autoplayDelay: 8000,
-                    autoplay: true,
-                    itemWidth: size.width * 0.9,
-                    layout: SwiperLayout.STACK,
-                    viewportFraction: 0.9,
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return const TopTrendingWidget();
-                    },
-                  ),
-                )
+              FutureBuilder<List<NewsModel>>(
+                future: newsProvider.fetchAllNews(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Expanded(
+                        child: LoadingWidget(
+                      newsType: newsType,
+                    ));
+                  } else if (snapshot.hasError) {
+                    return Expanded(
+                        child: EmptyNewsWidget(
+                      text: 'An error Occurred ${snapshot.error}',
+                      imagePath: 'assets/images/no_news.png',
+                    ));
+                  } else if (snapshot.data == null) {
+                    return const Expanded(
+                        child: EmptyNewsWidget(
+                      text: 'No news found',
+                      imagePath: 'assets/images/no_news.png',
+                    ));
+                  }
+                  return newsType == NewsType.allNews
+                      ? Expanded(
+                          child: ListView.builder(
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context, index) {
+                              return ChangeNotifierProvider.value(
+                                value: snapshot.data![index],
+                                child: const ArticlesWidget(),
+                              );
+                            },
+                          ),
+                        )
+                      : SizedBox(
+                          height: size.height * 0.6,
+                          child: Swiper(
+                            autoplayDelay: 8000,
+                            autoplay: true,
+                            itemWidth: size.width * 0.9,
+                            layout: SwiperLayout.STACK,
+                            viewportFraction: 0.9,
+                            itemCount: 5,
+                            itemBuilder: (context, index) {
+                              return TopTrendingWidget(
+                                url: snapshot.data![index].url,
+                              );
+                            },
+                          ),
+                        );
+                },
+              ),
             ],
           ),
         ),

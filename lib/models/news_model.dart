@@ -1,5 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-class NewsModel {
+import 'package:flutter/material.dart';
+import 'package:news/services/global_methods.dart';
+import 'package:reading_time/reading_time.dart';
+
+class NewsModel with ChangeNotifier {
   late String newsId;
   late String sourceName;
   late String authorName;
@@ -25,18 +29,26 @@ class NewsModel {
     required this.readingTimeText,
   });
   factory NewsModel.fromJson(dynamic json) {
+    String title = json['title'] ?? '';
+    String content = json['content'] ?? '';
+    String description = json['description'] ?? '';
+    String dateToShow = "";
+    if (json["publishedAt"] != null) {
+      dateToShow = GlobalMethods.formattedDateText(json["publishedAt"]);
+    }
     return NewsModel(
       newsId: json['source']['id'] ?? "",
       sourceName: json['source']['name'] ?? "",
       authorName: json['author'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
+      title: title,
+      description: description,
       url: json['url'] ?? '',
-      urlToImage: json['urlToImage'] ?? '',
+      urlToImage: json['urlToImage'] ??
+          'https://i.pinimg.com/564x/50/f4/49/50f44914865276b3832a0b76cad7d6f2.jpg',
       publishedAt: json['publishedAt'] ?? '',
-      content: json['content'] ?? '',
-      dateToShow: 'dateToShow',
-      readingTimeText: 'readingTimeText',
+      content: content,
+      dateToShow: dateToShow,
+      readingTimeText: readingTime(title + description + content).msg,
     );
   }
 

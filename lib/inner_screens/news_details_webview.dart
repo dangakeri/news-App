@@ -5,11 +5,16 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../services/global_methods.dart';
 import '../services/utils.dart';
 import '../widgets/vertical_spacing.dart';
 
 class NewsDetailsWebview extends StatefulWidget {
-  const NewsDetailsWebview({super.key});
+  final String url;
+  const NewsDetailsWebview({
+    Key? key,
+    required this.url,
+  }) : super(key: key);
 
   @override
   State<NewsDetailsWebview> createState() => _NewsDetailsWebviewState();
@@ -17,28 +22,34 @@ class NewsDetailsWebview extends StatefulWidget {
 
 class _NewsDetailsWebviewState extends State<NewsDetailsWebview> {
   // final WebViewController controller = WebViewController();
-  final controller = WebViewController()
-    ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    ..setBackgroundColor(const Color(0x00000000))
-    ..setNavigationDelegate(
-      NavigationDelegate(
-        onProgress: (int progress) {
-          // Update loading bar.
-          // _progress = progress / 100;
+  var loadingPercentage = 0;
+  late final WebViewController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = WebViewController()
+      ..setNavigationDelegate(NavigationDelegate(
+        onPageStarted: (url) {
+          setState(() {
+            loadingPercentage = 0;
+          });
         },
-        onPageStarted: (String url) {},
-        onPageFinished: (String url) {},
-        onWebResourceError: (WebResourceError error) {},
-        onNavigationRequest: (NavigationRequest request) {
-          if (request.url.startsWith('https://www.youtube.com/')) {
-            return NavigationDecision.prevent;
-          }
-          return NavigationDecision.navigate;
+        onProgress: (progress) {
+          setState(() {
+            loadingPercentage = progress;
+          });
         },
-      ),
-    )
-    ..loadRequest(Uri.parse(
-        'https://www.google.com/search?sca_esv=595131700&sxsrf=AM9HkKlimAvWkPHOKb9cSK85lG5uP8CkZA:1704217615075&q=Aconcagua&stick=H4sIAAAAAAAAAONgFmLXz9U3yEpPUeIEMQzTTc3LtRSzk630c_KTE0sy8_PgDKvEkpKixGQQs3gRK6djcn5ecmJ6aSIAwmgtuUUAAAA&sa=X&ved=2ahUKEwjR28Osob-DAxWE8wIHHbqrDhAQ2coHegQILhAB&biw=1280&bih=598&dpr=1.5'));
+        onPageFinished: (url) {
+          setState(() {
+            loadingPercentage = 100;
+          });
+        },
+      ))
+      ..loadRequest(
+        Uri.parse(widget.url),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color color = Utils(context).getColor;
@@ -65,7 +76,7 @@ class _NewsDetailsWebviewState extends State<NewsDetailsWebview> {
             elevation: 0,
             centerTitle: true,
             title: Text(
-              'url', // widget.url,
+              widget.url,
               style: TextStyle(color: color),
             ),
             actions: [
@@ -81,8 +92,16 @@ class _NewsDetailsWebviewState extends State<NewsDetailsWebview> {
         body: Column(
           children: [
             Expanded(
-              child: WebViewWidget(
-                controller: controller,
+              child: Stack(
+                children: [
+                  WebViewWidget(
+                    controller: controller,
+                  ),
+                  if (loadingPercentage < 100)
+                    LinearProgressIndicator(
+                      value: loadingPercentage / 100.0,
+                    ),
+                ],
               ),
             ),
           ],
@@ -139,8 +158,9 @@ class _NewsDetailsWebviewState extends State<NewsDetailsWebview> {
                       await Share.share('widget.url',
                           subject: 'Look what I made!');
                     } catch (err) {
-                      // GlobalMethods.errorDialog(
-                      //     errorMessage: err.toString(), context: context);
+                      // ignore: use_build_context_synchronously
+                      GlobalMethods.errorDialog(
+                          errorMessage: err.toString(), context: context);
                     }
                   },
                 ),
