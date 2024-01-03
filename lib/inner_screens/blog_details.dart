@@ -3,10 +3,12 @@ import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import 'package:share_plus/share_plus.dart';
 
 import '../consts/var.dart';
+import '../providers/news_provider.dart';
 import '../services/global_methods.dart';
 import '../services/utils.dart';
 import '../widgets/vertical_spacing.dart';
@@ -45,10 +47,10 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final color = Utils(context).getColor;
-    // final newsProvider = Provider.of<NewsProvider>(context);
+    final newsProvider = Provider.of<NewsProvider>(context);
     // final bookmarksProvider = Provider.of<BookmarksProvider>(context);
-
-    // final currentNews = newsProvider.findByDate(publishedAt: publishedAt);
+    final publishedAt = ModalRoute.of(context)!.settings.arguments as String;
+    final currentNews = newsProvider.findByDate(publishedAt: publishedAt);
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: color),
@@ -56,19 +58,19 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         centerTitle: true,
         title: Text(
-          "By ${'currentNews.authorName'}",
+          "By ${currentNews.authorName}",
           textAlign: TextAlign.center,
           style: TextStyle(color: color),
         ),
-        // leading: IconButton(
-        //   icon: Icon(
-        //     IconlyLight.arrowLeft,
-        //     color: color,
-        //   ),
-        //   onPressed: () {
-        //     Navigator.pop(context);
-        //   },
-        // ),
+        leading: IconButton(
+          icon: Icon(
+            IconlyLight.arrowLeft,
+            color: color,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: ListView(
         children: [
@@ -77,8 +79,8 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'currentNews.title',
+                Text(
+                  currentNews.title,
                   textAlign: TextAlign.justify,
                   // style: titleTextStyle,
                 ),
@@ -86,12 +88,12 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                 Row(
                   children: [
                     Text(
-                      'currentNews.dateToShow',
+                      currentNews.dateToShow,
                       style: smallTextStyle,
                     ),
                     const Spacer(),
                     Text(
-                      'currentNews.readingTimeText',
+                      currentNews.readingTimeText,
                       style: smallTextStyle,
                     ),
                   ],
@@ -107,11 +109,11 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 25),
                   child: Hero(
-                    tag: 'currentNews.publishedAt',
+                    tag: currentNews.publishedAt,
                     child: FancyShimmerImage(
                       boxFit: BoxFit.fill,
                       errorWidget: Image.asset('assets/images/empty_image.png'),
-                      imageUrl: 'currentNews.urlToImage',
+                      imageUrl: currentNews.urlToImage,
                     ),
                   ),
                 ),
@@ -126,7 +128,7 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                       GestureDetector(
                         onTap: () async {
                           try {
-                            await Share.share('currentNews.url',
+                            await Share.share(currentNews.url,
                                 subject: 'Look what I made!');
                           } catch (err) {
                             // ignore: use_build_context_synchronously
@@ -181,35 +183,35 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             ],
           ),
           const VerticalSpacing(20),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextContent(
+                const TextContent(
                   label: 'Description',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
-                VerticalSpacing(10),
+                const VerticalSpacing(10),
                 TextContent(
-                  label: 'currentNews.description',
+                  label: currentNews.description,
                   fontSize: 18,
                   fontWeight: FontWeight.normal,
                 ),
-                VerticalSpacing(
+                const VerticalSpacing(
                   20,
                 ),
-                TextContent(
+                const TextContent(
                   label: 'Contents',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
-                VerticalSpacing(
+                const VerticalSpacing(
                   10,
                 ),
                 TextContent(
-                  label: 'currentNews.content',
+                  label: currentNews.content,
                   fontSize: 18,
                   fontWeight: FontWeight.normal,
                 ),

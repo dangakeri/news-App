@@ -37,7 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<List<NewsModel>> getNewsList() async {
-    List<NewsModel> newsList = await ApiService.getNews();
+    List<NewsModel> newsList =
+        await ApiService.getNews(page: currentPageIndex, sortBy: sortBy);
     return newsList;
   }
 
@@ -195,13 +196,20 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: DropdownButton(
                             value: sortBy,
                             items: dropDownItems,
-                            onChanged: (value) {},
+                            onChanged: (value) {
+                              setState(() {
+                                sortBy = value!;
+                              });
+                            },
                           ),
                         ),
                       ),
                     ),
               FutureBuilder<List<NewsModel>>(
-                future: newsProvider.fetchAllNews(),
+                future: newsType == NewsType.topTrending
+                    ? newsProvider.fetchTopHeadlines()
+                    : newsProvider.fetchAllNews(
+                        pageIndex: currentPageIndex + 1, sortBy: sortBy),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Expanded(
@@ -241,10 +249,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             itemWidth: size.width * 0.9,
                             layout: SwiperLayout.STACK,
                             viewportFraction: 0.9,
-                            itemCount: 5,
+                            itemCount: snapshot.data!.length,
+                            // itemCount: 5,
                             itemBuilder: (context, index) {
-                              return TopTrendingWidget(
-                                url: snapshot.data![index].url,
+                              return ChangeNotifierProvider.value(
+                                value: snapshot.data![index],
+                                child: const TopTrendingWidget(),
                               );
                             },
                           ),
