@@ -24,6 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentPageIndex = 0;
   String sortBy = SortByEnum.publishedAt.name;
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Color color = Utils(context).getColor;
     Size size = Utils(context).getScreenSize;
