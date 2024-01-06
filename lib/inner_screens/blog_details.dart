@@ -1,13 +1,12 @@
 import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
 import 'package:share_plus/share_plus.dart';
 
 import '../consts/var.dart';
+import '../providers/bookmark_provider.dart';
 import '../providers/news_provider.dart';
 import '../services/global_methods.dart';
 import '../services/utils.dart';
@@ -22,33 +21,12 @@ class NewsDetailsScreen extends StatefulWidget {
 }
 
 class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
-  bool isInBookmark = false;
-  String? publishedAt;
-  dynamic currBookmark;
-  // @override
-  // void didChangeDependencies() {
-  //   publishedAt = ModalRoute.of(context)!.settings.arguments as String;
-  //   final List<BookmarksModel> bookmarkList =
-  //       Provider.of<BookmarksProvider>(context).getBookmarkList;
-  //   if (bookmarkList.isEmpty) {
-  //     return;
-  //   }
-  //   currBookmark = bookmarkList
-  //       .where((element) => element.publishedAt == publishedAt)
-  //       .toList();
-  //   if (currBookmark.isEmpty) {
-  //     isInBookmark = false;
-  //   } else {
-  //     isInBookmark = true;
-  //   }
-  //   super.didChangeDependencies();
-  // }
-
+  final bool isInBookmark = false;
   @override
   Widget build(BuildContext context) {
     final color = Utils(context).getColor;
     final newsProvider = Provider.of<NewsProvider>(context);
-    // final bookmarksProvider = Provider.of<BookmarksProvider>(context);
+    final bookmarksProvider = Provider.of<BookmarksProvider>(context);
     final publishedAt = ModalRoute.of(context)!.settings.arguments as String;
     final currentNews = newsProvider.findByDate(publishedAt: publishedAt);
     return Scaffold(
@@ -61,15 +39,6 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
           "By ${currentNews.authorName}",
           textAlign: TextAlign.center,
           style: TextStyle(color: color),
-        ),
-        leading: IconButton(
-          icon: Icon(
-            IconlyLight.arrowLeft,
-            color: color,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
         ),
       ),
       body: ListView(
@@ -151,15 +120,13 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                       ),
                       GestureDetector(
                         onTap: () async {
-                          // if (isInBookmark) {
-                          //   await bookmarksProvider.deleteBookmark(
-                          //       key: currBookmark[0].bookmarkKey);
-                          // } else {
-                          //   await bookmarksProvider.addToBookmark(
-                          //     newsModel: currentNews,
-                          //   );
-                          // }
-                          // await bookmarksProvider.fetchBookmarks();
+                          if (isInBookmark) {
+                            await bookmarksProvider.deleteBookmark();
+                          } else {
+                            await bookmarksProvider.addToBookmark(
+                              newsModel: currentNews,
+                            );
+                          }
                         },
                         child: Card(
                           elevation: 10,
@@ -167,11 +134,9 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Icon(
-                              isInBookmark
-                                  ? IconlyBold.bookmark
-                                  : IconlyLight.bookmark,
+                              IconlyLight.bookmark,
                               size: 28,
-                              color: isInBookmark ? Colors.green : color,
+                              color: color,
                             ),
                           ),
                         ),

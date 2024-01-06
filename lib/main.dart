@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'consts/theme_data.dart';
 import 'inner_screens/blog_details.dart';
+import 'providers/bookmark_provider.dart';
 import 'providers/news_provider.dart';
 import 'providers/theme_providers.dart';
 import 'screens/home_screen.dart';
@@ -45,9 +46,9 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (_) => NewsProvider(),
         ),
-        // ChangeNotifierProvider(
-        //   create: (_) => BookmarksProvider(),
-        // ),
+        ChangeNotifierProvider(
+          create: (_) => BookmarksProvider(),
+        ),
       ],
       child:
           //Notify about theme changes

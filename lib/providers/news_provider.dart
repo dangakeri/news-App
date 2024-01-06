@@ -22,4 +22,9 @@ class NewsProvider extends ChangeNotifier {
     return newsList
         .firstWhere((newsModel) => newsModel.publishedAt == publishedAt);
   }
+
+  Future<List<NewsModel>> searchNewsProvider({required String query}) async {
+    newsList = await ApiService.searchNews(query: query);
+    return newsList;
+  }
 }
